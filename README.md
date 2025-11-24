@@ -10,8 +10,7 @@
 
 > **💻 系统要求 / System Requirements**
 >
-> 本插件目前 **仅支持 Windows 操作系统**。
-> This extension currently supports **Windows ONLY**.
+> 本插件目前 现已支持 Windows-amd64/Mac/Linux 操作系统。
 
 一个用于监控 Antigravity AI 模型使用配额的 VS Code 插件，配额信息在底部状态栏显示。
 
@@ -60,7 +59,7 @@
 
 ## 使用方法
 
-[下载插件](https://github.com/wusimpl/AntigravityQuotaWatcher/releases/tag/V0.6.5)，然后安装插件，重启 Antigravity
+[下载插件](https://github.com/wusimpl/AntigravityQuotaWatcher/releases/tag/V0.7.0)，然后安装插件，重启 Antigravity
 
 ![Installation](https://raw.githubusercontent.com/wusimpl/AntigravityQuotaWatcher/main/images/install.png)
 

@@ -101,8 +101,22 @@ export class ProcessPortDetector {
         // 提供更具体的错误提示
         if (errorMsg.includes('timeout')) {
           console.error('   Reason: command execution timed out; the system may be under heavy load');
-        } else if (errorMsg.includes('not found') || errorMsg.includes('not recognized')) {
+        } else if (errorMsg.includes('not found') || errorMsg.includes('not recognized') || errorMsg.includes('不是内部或外部命令')) {
           console.error(`   Reason: ${errorMessages.commandNotAvailable}`);
+
+          // Windows 平台特殊处理:WMIC 降级到 PowerShell
+          if (this.platformDetector.getPlatformName() === 'Windows') {
+            const windowsStrategy = this.platformStrategy as any;
+            if (windowsStrategy.setUsePowerShell && !windowsStrategy.isUsingPowerShell()) {
+              console.warn('⚠️ WMIC command is unavailable (Windows 10 21H1+/Windows 11 deprecated WMIC)');
+              console.log('🔄 Switching to PowerShell mode and retrying...');
+              windowsStrategy.setUsePowerShell(true);
+
+              // 不消耗重试次数,直接重试当前尝试
+              attempt--;
+              continue;
+            }
+          }
         }
       }
 
