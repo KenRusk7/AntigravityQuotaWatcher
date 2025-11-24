@@ -261,6 +261,13 @@ export class StatusBarService {
     this.statusBarItem.show();
   }
 
+  clearError(): void {
+    this.statusBarItem.text = '$(sync~spin) Antigravity Quota Watcher: Loading...';
+    this.statusBarItem.backgroundColor = undefined;
+    this.statusBarItem.tooltip = 'Fetching quota information...';
+    this.statusBarItem.show();
+  }
+
   show(): void {
     this.statusBarItem.show();
   }

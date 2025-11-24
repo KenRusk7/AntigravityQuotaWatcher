@@ -165,6 +165,9 @@ export async function activate(context: vscode.ExtensionContext) {
             quotaService.setAuthInfo(undefined, result.csrfToken);
           }
 
+          // 清除之前的错误状态
+          statusBarService?.clearError();
+
           quotaService.stopPolling();
           quotaService.setApiMethod(config.apiMethod === 'COMMAND_MODEL_CONFIG'
             ? QuotaApiMethod.COMMAND_MODEL_CONFIG
