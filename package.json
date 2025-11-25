@@ -86,6 +86,12 @@
           "default": false,
           "description": "是否显示 Prompt Credits（此信息官方暂时没有使用）",
           "order": 70
+        },
+        "antigravityQuotaWatcher.forcePowerShell": {
+          "type": "boolean",
+          "default": false,
+          "description": "【仅 Windows系统】使用 PowerShell 模式检测进程",
+          "order": 75
         }
       }
     }

@@ -57,6 +57,11 @@
   - `GET_USER_STATUS`：获取完整配额信息
   - `COMMAND_MODEL_CONFIG`：兼容模式，适用于部分环境
 
+### PowerShell 模式（仅 Windows 系统）
+- **默认值**：`false`
+- **说明**：使用 PowerShell 模式检测进程
+- **适用场景**：如果在 Windows 系统上遇到端口检测错误，可以尝试启用此选项切换到 PowerShell 模式
+
 ## 使用方法
 
 [下载插件](https://github.com/wusimpl/AntigravityQuotaWatcher/releases/tag/V0.7.0)，然后安装插件，重启 Antigravity
@@ -100,6 +105,7 @@
 
 - 首次启动会延迟 8 秒开始监控，避免频繁请求
 - 如果状态栏显示错误，可使用"重新检测端口"命令修复
+- **Windows 用户**：如果遇到端口检测错误，可以在设置中启用 `forcePowerShell` 选项，切换到 PowerShell 模式进行进程检测
 
 ## 许可证
 
