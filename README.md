@@ -4,8 +4,6 @@
 > 本插件为非官方工具，与 Antigravity 没有任何关联。
 > 本插件依赖于 Antigravity 语言服务器的内部实现细节，相关机制可能会随时变动。
 >
-> This extension is an unofficial tool and is NOT affiliated with, endorsed by, or connected to Antigravity.
-> It relies on the internal implementation details of the Antigravity language server, which may change at any time. Use at your own risk.
 
 > **💻 系统要求 / System Requirements**
 >
