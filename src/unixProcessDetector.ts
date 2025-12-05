@@ -3,6 +3,7 @@
  * Uses ps and lsof/netstat commands.
  */
 
+declare const process: any;
 import { IPlatformStrategy } from './platformDetector';
 
 export class UnixProcessDetector implements IPlatformStrategy {
@@ -16,15 +17,13 @@ export class UnixProcessDetector implements IPlatformStrategy {
      * Get command to list Unix processes using ps and grep.
      */
     getProcessListCommand(processName: string): string {
-        // Use ps aux to get full command line, grep for the process, exclude grep itself
-        return `ps aux | grep "${processName}" | grep -v grep`;
+        // Use ps -ww -eo pid,ppid,args to get PID, PPID and full command line
+        // -ww: unlimited width (avoid truncation)
+        // -e: select all processes
+        // -o: user-defined format
+        return `ps -ww -eo pid,ppid,args | grep "${processName}" | grep -v grep`;
     }
 
-    /**
-     * Parse ps output to extract process information.
-     * Expected format:
-     *   user  1234  0.0  0.0  ...  /path/to/language_server --extension_server_port=1234 --csrf_token=abc123
-     */
     parseProcessInfo(stdout: string): {
         pid: number;
         extensionPort: number;
@@ -34,40 +33,50 @@ export class UnixProcessDetector implements IPlatformStrategy {
             return null;
         }
 
-        // Extract command line arguments from ps output
-        const portMatch = stdout.match(/--extension_server_port[=\s]+(\d+)/);
-        const tokenMatch = stdout.match(/--csrf_token[=\s]+([a-f0-9\-]+)/i);
-
-        // Parse PID from ps output (second column)
-        // Format: user PID %CPU %MEM ...
         const lines = stdout.trim().split('\n');
-        if (lines.length === 0) {
+        const currentPid = process.pid;
+        const candidates: Array<{ pid: number; ppid: number; extensionPort: number; csrfToken: string }> = [];
+
+        for (const line of lines) {
+            // Format: PID PPID COMMAND...
+            const parts = line.trim().split(/\s+/);
+            if (parts.length < 3) {
+                continue;
+            }
+
+            const pid = parseInt(parts[0], 10);
+            const ppid = parseInt(parts[1], 10);
+
+            // Reconstruct command line (it might contain spaces)
+            const cmd = parts.slice(2).join(' ');
+
+            if (isNaN(pid) || isNaN(ppid)) {
+                continue;
+            }
+
+            const portMatch = cmd.match(/--extension_server_port[=\s]+(\d+)/);
+            const tokenMatch = cmd.match(/--csrf_token[=\s]+([a-f0-9\-]+)/i);
+
+            if (tokenMatch && tokenMatch[1]) {
+                const extensionPort = portMatch && portMatch[1] ? parseInt(portMatch[1], 10) : 0;
+                const csrfToken = tokenMatch[1];
+                candidates.push({ pid, ppid, extensionPort, csrfToken });
+            }
+        }
+
+        if (candidates.length === 0) {
             return null;
         }
 
-        // Take the first matching line
-        const firstLine = lines[0];
-        const columns = firstLine.trim().split(/\s+/);
-
-        if (columns.length < 2) {
-            return null;
+        // 1. Prefer the process that is a direct child of the current process (extension host)
+        const child = candidates.find(c => c.ppid === currentPid);
+        if (child) {
+            return child;
         }
 
-        const pidStr = columns[1];
-        const pid = parseInt(pidStr, 10);
-
-        if (isNaN(pid)) {
-            return null;
-        }
-
-        if (!tokenMatch || !tokenMatch[1]) {
-            return null;
-        }
-
-        const extensionPort = portMatch && portMatch[1] ? parseInt(portMatch[1], 10) : 0;
-        const csrfToken = tokenMatch[1];
-
-        return { pid, extensionPort, csrfToken };
+        // 2. Fallback: return the first candidate found (legacy behavior)
+        // This handles cases where the process hierarchy might be different (e.g. intermediate shell)
+        return candidates[0];
     }
 
     /**
