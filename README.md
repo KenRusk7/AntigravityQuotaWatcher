@@ -25,10 +25,10 @@
 
 ## 系统要求
 
-![Windows](https://img.shields.io/badge/Windows--amd64-supported-brightgreen?logo=microsoftwindows&logoColor=white)
-![macOS](https://img.shields.io/badge/macOS-supported-brightgreen?logo=apple&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-supported-brightgreen?logo=linux&logoColor=white)
-![Windows ARM](https://img.shields.io/badge/Windows--arm64-not%20supported-red?logo=microsoftwindows&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows--amd64-支持-brightgreen?logo=microsoftwindows&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-支持-brightgreen?logo=apple&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-支持-brightgreen?logo=linux&logoColor=white)
+![Windows ARM](https://img.shields.io/badge/Windows--arm64-不支持-red?logo=microsoftwindows&logoColor=white)
 
 ## 使用方法
 
