@@ -1,13 +1,17 @@
 /**
  * Windows-specific process detection implementation.
  * Uses wmic (fallback to PowerShell if unavailable) and netstat commands.
+ * 
+ * Security Note: PowerShell path is resolved using SafePowerShellPath which
+ * implements a controlled search order to prevent path hijacking attacks.
+ * See safePowerShellPath.ts for details.
  */
 
 import { IPlatformStrategy } from './platformDetector';
+import { SafePowerShellPath } from './safePowerShellPath';
 
 export class WindowsProcessDetector implements IPlatformStrategy {
     private static readonly SYSTEM_ROOT: string = process.env.SystemRoot || 'C:\\Windows';
-    private static readonly POWERSHELL_PATH: string = `"${WindowsProcessDetector.SYSTEM_ROOT}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"`;
     private static readonly WMIC_PATH: string = `"${WindowsProcessDetector.SYSTEM_ROOT}\\System32\\wbem\\wmic.exe"`;
     private static readonly NETSTAT_PATH: string = `"${WindowsProcessDetector.SYSTEM_ROOT}\\System32\\netstat.exe"`;
     private static readonly FINDSTR_PATH: string = `"${WindowsProcessDetector.SYSTEM_ROOT}\\System32\\findstr.exe"`;
@@ -36,7 +40,9 @@ export class WindowsProcessDetector implements IPlatformStrategy {
     getProcessListCommand(processName: string): string {
         if (this.usePowerShell) {
             // PowerShell 命令:使用 Get-CimInstance 获取进程信息并输出 JSON
-            return `${WindowsProcessDetector.POWERSHELL_PATH} -NoProfile -Command "Get-CimInstance Win32_Process -Filter \\"name='${processName}'\\" | Select-Object ProcessId,CommandLine | ConvertTo-Json"`;
+            // 使用 SafePowerShellPath 获取安全的 PowerShell 路径，防止路径劫持攻击
+            const psPath = SafePowerShellPath.getSafePath();
+            return `${psPath} -NoProfile -Command "Get-CimInstance Win32_Process -Filter \\"name='${processName}'\\" | Select-Object ProcessId,CommandLine | ConvertTo-Json"`;
         } else {
             // WMIC 命令(传统方式)
             return `${WindowsProcessDetector.WMIC_PATH} process where "name='${processName}'" get ProcessId,CommandLine /format:list`;
@@ -88,7 +94,7 @@ export class WindowsProcessDetector implements IPlatformStrategy {
                     }
                     const totalCount = data.length;
                     // 过滤出 Antigravity 进程
-                    const antigravityProcesses = data.filter((item: any) => 
+                    const antigravityProcesses = data.filter((item: any) =>
                         item.CommandLine && this.isAntigravityProcess(item.CommandLine)
                     );
                     console.log(`[WindowsProcessDetector] Found ${totalCount} language_server process(es), ${antigravityProcesses.length} belong to Antigravity`);
@@ -136,43 +142,43 @@ export class WindowsProcessDetector implements IPlatformStrategy {
         // WMIC 输出格式为多个进程块，每个块包含 CommandLine= 和 ProcessId= 行
         // 需要按进程分组处理，避免混淆不同进程的参数
         const blocks = stdout.split(/\n\s*\n/).filter(block => block.trim().length > 0);
-        
+
         const candidates: Array<{ pid: number; extensionPort: number; csrfToken: string }> = [];
-        
+
         for (const block of blocks) {
             const pidMatch = block.match(/ProcessId=(\d+)/);
             const commandLineMatch = block.match(/CommandLine=(.+)/);
-            
+
             if (!pidMatch || !commandLineMatch) {
                 continue;
             }
-            
+
             const commandLine = commandLineMatch[1].trim();
-            
+
             // 检查是否是 Antigravity 进程
             if (!this.isAntigravityProcess(commandLine)) {
                 continue;
             }
-            
+
             const portMatch = commandLine.match(/--extension_server_port[=\s]+(\d+)/);
             const tokenMatch = commandLine.match(/--csrf_token[=\s]+([a-f0-9\-]+)/i);
-            
+
             if (!tokenMatch || !tokenMatch[1]) {
                 continue;
             }
-            
+
             const pid = parseInt(pidMatch[1], 10);
             const extensionPort = portMatch && portMatch[1] ? parseInt(portMatch[1], 10) : 0;
             const csrfToken = tokenMatch[1];
-            
+
             candidates.push({ pid, extensionPort, csrfToken });
         }
-        
+
         if (candidates.length === 0) {
             console.log('[WindowsProcessDetector] WMIC: No Antigravity process found');
             return null;
         }
-        
+
         console.log(`[WindowsProcessDetector] WMIC: Found ${candidates.length} Antigravity process(es), using PID: ${candidates[0].pid}`);
         return candidates[0];
     }
