@@ -17,6 +17,8 @@ let statusBarService: StatusBarService | undefined;
 let configService: ConfigService | undefined;
 let portDetectionService: PortDetectionService | undefined;
 let configChangeTimer: NodeJS.Timeout | undefined;  // 配置变更防抖定时器
+let lastFocusRefreshTime: number = 0;  // 上次焦点刷新时间戳
+const FOCUS_REFRESH_THROTTLE_MS = 30000;  // 焦点刷新节流阈值
 
 /**
  * Called when the extension is activated
@@ -279,6 +281,38 @@ export async function activate(context: vscode.ExtensionContext) {
     handleConfigChange(newConfig as Config);
   });
 
+  // 窗口焦点刷新：用户从浏览器切回 VS Code 时自动刷新配额
+  // 典型场景：用户在浏览器中切换账号（普通号 -> Pro），切回时需要立即看到新配额
+  const windowFocusDisposable = vscode.window.onDidChangeWindowState((e) => {
+    // 仅在窗口获得焦点时触发
+    if (!e.focused) {
+      return;
+    }
+
+    // 检查插件是否启用
+    const currentConfig = configService?.getConfig();
+    if (!currentConfig?.enabled) {
+      return;
+    }
+
+    // 检查 quotaService 是否已初始化
+    if (!quotaService) {
+      console.log('[FocusRefresh] quotaService not initialized, skipping');
+      return;
+    }
+
+    // 节流：X秒内只触发一次，避免频繁刷新
+    const now = Date.now();
+    if (now - lastFocusRefreshTime < FOCUS_REFRESH_THROTTLE_MS) {
+      console.log('[FocusRefresh] Throttled, skipping refresh');
+      return;
+    }
+    lastFocusRefreshTime = now;
+
+    console.log('[FocusRefresh] Window focused, triggering quota refresh');
+    quotaService.quickRefresh();
+  });
+
   // Add to context subscriptions
   context.subscriptions.push(
     showQuotaCommand,
@@ -286,6 +320,7 @@ export async function activate(context: vscode.ExtensionContext) {
     refreshQuotaCommand,
     detectPortCommand,
     configChangeDisposable,
+    windowFocusDisposable,
     { dispose: () => quotaService?.dispose() },
     { dispose: () => statusBarService?.dispose() }
   );
