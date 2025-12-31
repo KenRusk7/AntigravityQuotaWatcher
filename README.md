@@ -37,7 +37,14 @@
 ![Linux](https://img.shields.io/badge/Linux-支持-brightgreen?logo=linux&logoColor=white)
 ![Windows ARM](https://img.shields.io/badge/Windows--arm64-不支持-red?logo=microsoftwindows&logoColor=white)
 
-## 使用方法
+## 安装方法
+
+
+### 方式一：插件市场安装（推荐）
+
+在插件市场搜索 `Antigravity Quota Watcher`，点击安装即可。
+
+### 方式二：手动安装
 
 [下载插件](https://github.com/wusimpl/AntigravityQuotaWatcher/releases/latest)，然后安装插件，重启 Antigravity
 

@@ -38,6 +38,13 @@
 
 ## Installation
 
+
+### Method 1: Install from Open VSX Marketplace (Recommended)
+
+Search for `Antigravity Quota Watcher` in the extension marketplace and click install.
+
+### Method 2: Manual Installation
+
 [Download the extension](https://github.com/wusimpl/AntigravityQuotaWatcher/releases/latest), install it, and restart Antigravity.
 
 ![Installation](https://raw.githubusercontent.com/wusimpl/AntigravityQuotaWatcher/main/images/install.png)
