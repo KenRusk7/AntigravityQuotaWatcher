@@ -694,6 +694,8 @@ export class QuotaService {
     const resetTime = new Date(quotaInfo.resetTime);
     const timeUntilReset = resetTime.getTime() - Date.now();
 
+    console.log(`[QuotaService] Model ${config.label}: resetTime=${quotaInfo.resetTime}, timeUntilReset=${timeUntilReset}ms (${timeUntilReset <= 0 ? 'EXPIRED' : 'valid'})`);
+
     return {
       label: config.label,
       modelId: config.modelOrAlias.model,
