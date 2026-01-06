@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 📖 查看 README
+  - name: 📖 提交Issue前，请详细阅读 README
     url: https://github.com/wusimpl/AntigravityQuotaWatcher#readme
-    about: 请先阅读 README，了解插件使用方法和常见问题
+    about: 请先阅读 README，了解插件使用方法和常见问题，如果仍有疑问，请提交 Issue
