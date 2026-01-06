@@ -1,0 +1,86 @@
+name: "🐛 Bug 报告"
+description: "提交一个 Bug 以帮助我们改进"
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！请务必提供完整信息，否则 Issue 可能会被直接关闭。
+        
+        > 💡 不知道怎么导出日志的请看 [README 的介绍](https://github.com/wusimpl/AntigravityQuotaWatcher#提交issue)
+
+  - type: dropdown
+    id: ide
+    attributes:
+      label: 使用的 IDE
+      description: 请选择你正在使用的 IDE
+      options:
+        - Antigravity
+        - VS Code
+        - WindSurf
+        - Kiro
+        - 其他 (请在问题描述中说明)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 插件版本
+      description: 请填写你正在使用的插件版本
+      placeholder: "例如: v0.9.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 请清晰地描述你遇到的问题
+      placeholder: "描述你遇到了什么问题..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请提供复现此问题的详细步骤
+      placeholder: |
+        1. 打开 IDE
+        2. ...
+        3. ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 运行日志 (必填)
+      description: 请贴入相关错误日志或终端输出
+      placeholder: "在这里粘贴日志内容..."
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认事项
+      options:
+        - label: 我已经尝试过重启 IDE
+          required: true
+        - label: 我已经检查过是否有相同的 Issue
+          required: true
